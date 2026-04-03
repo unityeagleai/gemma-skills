@@ -8,25 +8,28 @@
   <body>
     <script>
       /**
-       * Searches Grokipedia for a topic using the typeahead API.
+       * Searches Grokipedia for a topic via allorigins CORS proxy.
        * @param {string} topic - The search topic.
        */
       async function fetchGrokipedia(topic) {
-        const url =
+        var apiUrl =
           "https://grokipedia.com/api/typeahead?query=" +
           encodeURIComponent(topic);
-        const res = await fetch(url);
+        var proxyUrl =
+          "https://api.allorigins.win/raw?url=" +
+          encodeURIComponent(apiUrl);
+
+        var res = await fetch(proxyUrl);
         if (!res.ok) throw new Error("HTTP error: " + res.status);
-        const data = await res.json();
+        var data = await res.json();
 
         if (!data.results || data.results.length === 0) {
           return { error: "No Grokipedia articles found for '" + topic + "'." };
         }
 
-        const top = data.results[0];
-        const articleUrl = "https://grokipedia.com/" + top.slug;
-
-        const resultText =
+        var top = data.results[0];
+        var articleUrl = "https://grokipedia.com/" + top.slug;
+        var resultText =
           "Title: " + top.title +
           "\n\nSummary: " + top.snippet +
           "\n\nFull article: " + articleUrl;
@@ -41,11 +44,11 @@
 
       window["ai_edge_gallery_get_result"] = async function (data) {
         try {
-          const jsonData = JSON.parse(data);
+          var jsonData = JSON.parse(data);
           if (!jsonData.topic) {
             return JSON.stringify({ error: "No topic provided to search." });
           }
-          const grokResponse = await fetchGrokipedia(jsonData.topic);
+          var grokResponse = await fetchGrokipedia(jsonData.topic);
           return JSON.stringify(grokResponse);
         } catch (e) {
           console.error(e);

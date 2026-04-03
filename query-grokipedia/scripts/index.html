@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Query Grokipedia</title>
+  </head>
+  <body>
+    <script>
+      /**
+       * Searches Grokipedia for a topic using the typeahead API.
+       * @param {string} topic - The search topic.
+       */
+      async function fetchGrokipedia(topic) {
+        const url =
+          "https://grokipedia.com/api/typeahead?query=" +
+          encodeURIComponent(topic);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("HTTP error: " + res.status);
+        const data = await res.json();
+
+        if (!data.results || data.results.length === 0) {
+          return { error: "No Grokipedia articles found for '" + topic + "'." };
+        }
+
+        const top = data.results[0];
+        const articleUrl = "https://grokipedia.com/" + top.slug;
+
+        const resultText =
+          "Title: " + top.title +
+          "\n\nSummary: " + top.snippet +
+          "\n\nFull article: " + articleUrl;
+
+        return {
+          title: top.title,
+          snippet: top.snippet,
+          url: articleUrl,
+          result: resultText
+        };
+      }
+
+      window["ai_edge_gallery_get_result"] = async function (data) {
+        try {
+          const jsonData = JSON.parse(data);
+          if (!jsonData.topic) {
+            return JSON.stringify({ error: "No topic provided to search." });
+          }
+          const grokResponse = await fetchGrokipedia(jsonData.topic);
+          return JSON.stringify(grokResponse);
+        } catch (e) {
+          console.error(e);
+          return JSON.stringify({
+            error: "Failed to query Grokipedia: " + e.message
+          });
+        }
+      };
+    </script>
+  </body>
+</html>

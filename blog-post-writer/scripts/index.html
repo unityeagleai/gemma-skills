@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Blog Post Writer</title>
+  <script>
+    window["ai_edge_gallery_get_result"] = async function (data) {
+      try {
+        var d = JSON.parse(data);
+        if (!d.title || !d.sections) {
+          return JSON.stringify({ error: "Invalid blog post structure. Expected title and sections." });
+        }
+
+        var sectionHtml = d.sections.map(function (s) {
+          var paras = (s.paragraphs || []).map(function (p) {
+            return "<p>" + escHtml(p) + "</p>";
+          }).join("\n          ");
+
+          var pq = s.pullquote
+            ? "\n          <div class=\"pull-quote\"><p>" + escHtml(s.pullquote) + "</p></div>"
+            : "";
+
+          return (
+            "<hr>\n  <div class=\"section-marker\">" + escHtml(s.marker) + "</div>\n\n  " +
+            paras + pq
+          );
+        }).join("\n\n  ");
+
+        var html = "<!DOCTYPE html>\n" +
+"<html lang=\"en\">\n" +
+"<head>\n" +
+"  <meta charset=\"UTF-8\" />\n" +
+"  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n" +
+"  <title>" + escHtml(d.title) + " | UNITYEAGLE</title>\n" +
+"  <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n" +
+"  <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n" +
+"  <link href=\"https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap\" rel=\"stylesheet\">\n" +
+"  <style>\n" +
+"    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n" +
+"    body { background: #0a0a0c; color: #c8d8e0; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; line-height: 1.75; min-height: 100vh; }\n" +
+"    .dax-blog { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }\n" +
+"    .post-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: #00e5ff; letter-spacing: 0.2em; opacity: 0.55; margin-bottom: 16px; text-transform: uppercase; }\n" +
+"    h1 { font-family: 'Orbitron', monospace; font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 900; color: #e8f4f8; line-height: 1.2; letter-spacing: 0.02em; text-transform: uppercase; margin-bottom: 16px; }\n" +
+"    .post-meta { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: #00e5ff; opacity: 0.5; letter-spacing: 0.12em; margin-bottom: 40px; }\n" +
+"    hr { border: none; border-top: 1px solid rgba(0, 229, 255, 0.1); margin: 40px 0; }\n" +
+"    .section-marker { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: #00e5ff; opacity: 0.6; letter-spacing: 0.15em; margin-bottom: 20px; }\n" +
+"    p { margin-bottom: 1.4rem; font-weight: 400; color: #c8d8e0; }\n" +
+"    .pull-quote { border-left: 3px solid #d4a056; padding: 16px 24px; margin: 36px 0; background: rgba(212, 160, 86, 0.04); }\n" +
+"    .pull-quote p { font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; font-weight: 600; color: #d4a056; line-height: 1.5; margin: 0; }\n" +
+"    a { color: #00e5ff; text-decoration: none; border-bottom: 1px solid rgba(0, 229, 255, 0.3); transition: border-color 0.2s; }\n" +
+"    a:hover { border-color: #00e5ff; }\n" +
+"    .blog-footer { margin-top: 72px; padding-top: 24px; border-top: 1px solid rgba(0, 229, 255, 0.1); font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; line-height: 2; color: rgba(0, 229, 255, 0.4); text-align: center; }\n" +
+"    .blog-footer span { color: #d4a056; }\n" +
+"  </style>\n" +
+"</head>\n" +
+"<body>\n" +
+"<div class=\"dax-blog\">\n" +
+"  <div class=\"post-tag\">" + escHtml(d.tag) + "</div>\n" +
+"  <h1>" + escHtml(d.title) + "</h1>\n" +
+"  <p class=\"post-meta\">" + escHtml(d.date) + " &middot; TRANSMITTED BY UNITYEAGLE</p>\n" +
+"\n  " + sectionHtml + "\n\n" +
+"  <hr>\n" +
+"  <div class=\"blog-footer\">\n" +
+"    TRANSMITTED BY <span>UNITYEAGLE</span> / AI-CREATIVERSE &mdash; WHERE INTENTION MEETS EMERGENCE\n" +
+"  </div>\n" +
+"</div>\n" +
+"</body>\n" +
+"</html>";
+
+        return html;
+      } catch (e) {
+        return JSON.stringify({ error: "Failed to build post: " + e.message });
+      }
+    };
+
+    function escHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+  </script>
+</head>
+<body></body>
+</html>
